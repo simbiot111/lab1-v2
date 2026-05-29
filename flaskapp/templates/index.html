@@ -1,1 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Contrast Adjustment</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px;
+        }
+        .img-preview {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-top: 10px;
+        }
+        .histogram-img {
+            width: 100%;
+            border-radius: 10px;
+            background: white;
+            padding: 10px;
+        }
+        .slider-value {
+            font-weight: bold;
+            color: #667eea;
+        }
+        .alert {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h2>🎨 Image Contrast Adjustment</h2>
+                    <p class="mb-0">Изменение контрастности изображения с гистограммами цветов</p>
+                </div>
+                <div class="card-body">
+                    <!-- Форма -->
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Поле для загрузки файла -->
+                        <div class="mb-3">
+                            <label for="image" class="form-label fw-bold">📷 Выберите изображение</label>
+                            <input type="file" name="image" id="image" class="form-control" accept="image/*" required>
+                            {% if form.image.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {% for error in form.image.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Слайдер контраста -->
+                        <div class="mb-3">
+                            <label for="contrast" class="form-label fw-bold">🎚️ Уровень контраста</label>
+                            <input type="range" name="contrast" id="contrast" 
+                                   class="form-range" min="0" max="2" step="0.01" value="{{ contrast }}">
+                            <div class="text-center mt-2">
+                                <span class="badge bg-primary slider-value" id="contrastValue">{{ contrast }}</span>
+                            </div>
+                            <small class="text-muted">1.0 = оригинал, 0.0 = серый, 2.0 = максимальный контраст</small>
+                        </div>
+                        
+                        <!-- Google reCAPTCHA -->
+                        <div class="mb-3 text-center">
+                            <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                            {% if captcha_error %}
+                                <div class="alert alert-danger mt-2">{{ captcha_error }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Кнопка отправки -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                🔄 Применить контраст
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Результаты (если есть) -->
+            {% if original_image %}
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h4 class="mb-0">📸 Исходное изображение</h4>
+                        </div>
+                        <div class="card-body text-center">
+                            <img src="{{ original_image }}" alt="Original" class="img-preview">
+                            {% if original_hist %}
+                                <hr>
+                                <h5>📊 Гистограмма цветов</h5>
+                                <img src="data:image/png;base64,{{ original_hist }}" alt="Original histogram" class="histogram-img">
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h4 class="mb-0">✨ Изменённое изображение</h4>
+                            <small>Контраст: {{ contrast }}</small>
+                        </div>
+                        <div class="card-body text-center">
+                            <img src="{{ modified_image }}" alt="Modified" class="img-preview">
+                            {% if modified_hist %}
+                                <hr>
+                                <h5>📊 Гистограмма цветов</h5>
+                                <img src="data:image/png;base64,{{ modified_hist }}" alt="Modified histogram" class="histogram-img">
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 
+<!-- Скрипт для отображения значения слайдера -->
+<script>
+    const slider = document.getElementById('contrast');
+    const span = document.getElementById('contrastValue');
+    if (slider && span) {
+        slider.addEventListener('input', function() {
+            span.innerText = this.value;
+        });
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

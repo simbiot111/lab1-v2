@@ -1,1 +1,11 @@
+version: 1.0.{build}
+image: Ubuntu2204
+stack: python 3.12
+build: off
 
+install:
+  - pip install -r requirements.txt
+
+test_script:
+  - python --version
+  - python -m unittest discover tests/
