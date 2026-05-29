@@ -52,7 +52,7 @@ def adjust_contrast(image, contrast_level):
     img_normalized = img_array / 255.0
     adjusted = (img_normalized - 0.5) * contrast_level + 0.5
     adjusted = np.clip(adjusted, 0, 1)
-    adjusted = (adjusted * 255).astype(np.uint8)
+    adjusted = np.round(adjusted * 255).astype(np.uint8)
     return Image.fromarray(adjusted)
 
 def compute_histogram(image):
